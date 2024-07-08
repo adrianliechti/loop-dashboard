@@ -1,0 +1,41 @@
+services:
+  # proxy:
+  #   build: .
+  #   environment:
+  #     - TARGET_WEB=http://web:8081
+  #     - TARGET_API=http://api:8082
+  #     - TARGET_AUTH=http://auth:8083
+  #     - TOKEN=${TOKEN:?}
+  #   ports:
+  #     - 8080:8080
+
+  web:
+    image: docker.io/kubernetesui/dashboard-web:1.4.0
+    command:
+      - --insecure-port=8081
+      - --kubeconfig=/kubeconfig
+    volumes:
+      - ${KUBECONFIG:?}:/kubeconfig
+    ports:
+      - 8081:8081
+
+  api:
+    image: docker.io/kubernetesui/dashboard-api:1.7.0
+    command:
+      - --insecure-port=8082
+      - --kubeconfig=/kubeconfig
+      - --metrics-provider=none
+    volumes:
+      - ${KUBECONFIG:?}:/kubeconfig
+    ports:
+      - 8082:8082
+
+  auth:
+    image: docker.io/kubernetesui/dashboard-auth:1.1.3
+    command:
+      - --port=8083
+      - --kubeconfig=/kubeconfig
+    volumes:
+      - ${KUBECONFIG:?}:/kubeconfig
+    ports:
+      - 8083:8083
