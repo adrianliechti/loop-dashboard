@@ -4,6 +4,6 @@ vars:
   DOCKER_IMAGE: ghcr.io/adrianliechti/loop-dashboard
 
 tasks:
-  push:
+  publish:
     cmds:
       - docker buildx build --push --platform linux/arm64,linux/amd64 --tag {{.DOCKER_IMAGE}} .
