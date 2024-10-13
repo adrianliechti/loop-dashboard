@@ -11,15 +11,20 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	webProxy := createProxy(getEnv("TARGET_WEB", "http://localhost:8081"))
-	apiProxy := createProxy(getEnv("TARGET_API", "http://localhost:8082"))
-	authProxy := createProxy(getEnv("TARGET_AUTH", "http://localhost:8083"))
+	webProxy := createProxy(getEnv("TARGET_WEB", "http://127.0.0.1:8081/"))
+	apiProxy := createProxy(getEnv("TARGET_API", "http://127.0.0.1:8082/"))
+	authProxy := createProxy(getEnv("TARGET_AUTH", "http://127.0.0.1:8083/"))
 
-	mux.Handle("/*", webProxy)
-	mux.Handle("/api/*", apiProxy)
+	mux.Handle("/", webProxy)
+
+	mux.Handle("/api", apiProxy)
+	mux.Handle("/api/", apiProxy)
+
 	mux.Handle("/api/v1/me", authProxy)
 	mux.Handle("/api/v1/login", authProxy)
-	mux.Handle("/api/v1/csrftoken/*", authProxy)
+	mux.Handle("/api/v1/csrftoken/", authProxy)
+
+	mux.Handle("/metrics", apiProxy)
 
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		slog.Info("request", "method", r.Method, "url", r.URL.String(), "remote", r.RemoteAddr, "user-agent", r.UserAgent())
@@ -31,7 +36,7 @@ func main() {
 		mux.ServeHTTP(w, r)
 	})
 
-	http.ListenAndServe(":8080", h)
+	http.ListenAndServe(":9090", h)
 }
 
 func createProxy(target string) http.Handler {
@@ -40,7 +45,6 @@ func createProxy(target string) http.Handler {
 	return &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetURL(targetURL)
-			r.Out.Host = r.In.Host
 		},
 	}
 }

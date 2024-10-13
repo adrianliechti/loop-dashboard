@@ -7,7 +7,7 @@ services:
   #     - TARGET_AUTH=http://auth:8083
   #     - TOKEN=${TOKEN:?}
   #   ports:
-  #     - 8080:8080
+  #     - 9090:9090
 
   web:
     image: docker.io/kubernetesui/dashboard-web:1.4.0

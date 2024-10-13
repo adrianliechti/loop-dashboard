@@ -23,6 +23,6 @@ RUN --mount=type=cache,target=/var/cache/apk \
 
 COPY --from=build /bin/server /bin
 
-EXPOSE 8080
+EXPOSE 9090
 
 ENTRYPOINT [ "/bin/server" ]

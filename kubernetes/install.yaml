@@ -44,7 +44,7 @@ spec:
           image: ghcr.io/adrianliechti/loop-dashboard
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 9090
           resources: {}
         - name: web
           image: docker.io/kubernetesui/dashboard-web:1.4.0
@@ -85,4 +85,4 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 8080
+      targetPort: 9090
