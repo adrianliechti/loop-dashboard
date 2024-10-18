@@ -11,9 +11,11 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	webProxy := createProxy(getEnv("TARGET_WEB", "http://127.0.0.1:8081/"))
-	apiProxy := createProxy(getEnv("TARGET_API", "http://127.0.0.1:8082/"))
-	authProxy := createProxy(getEnv("TARGET_AUTH", "http://127.0.0.1:8083/"))
+	baseURL := mustParseURL(getEnv("BASE_URL", "http://localhost:9090/"))
+
+	webProxy := createProxy(baseURL, mustParseURL(getEnv("TARGET_WEB", "http://127.0.0.1:8081/")))
+	apiProxy := createProxy(baseURL, mustParseURL(getEnv("TARGET_API", "http://127.0.0.1:8082/")))
+	authProxy := createProxy(baseURL, mustParseURL(getEnv("TARGET_AUTH", "http://127.0.0.1:8083/")))
 
 	mux.Handle("/", webProxy)
 
@@ -39,12 +41,25 @@ func main() {
 	http.ListenAndServe(":9090", h)
 }
 
-func createProxy(target string) http.Handler {
-	targetURL, _ := url.Parse(target)
+func mustParseURL(rawURL string) *url.URL {
+	u, err := url.Parse(rawURL)
 
+	if err != nil {
+		panic(err)
+	}
+
+	return u
+}
+
+func createProxy(baseURL *url.URL, targetURL *url.URL) http.Handler {
 	return &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetURL(targetURL)
+			r.Out.Host = r.In.Host
+
+			if baseURL.Host != "" {
+				r.Out.Host = baseURL.Host
+			}
 		},
 	}
 }
